@@ -1,0 +1,14 @@
+{
+  "name": "markov",
+  "version": "1.0.0",
+  "description": "markov package for typing",
+  "main": "markov.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James Bryant",
+  "license": "ISC",
+  "dependencies": {
+    "mathjs": "^11.5.0"
+  }
+}
