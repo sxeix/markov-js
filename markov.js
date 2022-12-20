@@ -3,6 +3,7 @@
 const math = require('mathjs');
 
 module.exports = class Markov {
+
     constructor() {
         this.model = {};
         this.expectedModel = {};
@@ -86,7 +87,11 @@ module.exports = class Markov {
         let userMatrix = this.modelToMatrix(this.model);
         let expectedMatrix = this.modelToMatrix(this.expectedModel);
         let error = this.calculateError(userMatrix, expectedMatrix);
-        return this.calculateFocusSet(error);
+        let focusSets =  this.calculateFocusSet(error);
+        let sortedFocusSets = focusSets.sort((a, b) => {
+            return (a.error < b.error) ? 1 : (a.error > b.error) ? -1 : 0;
+        });
+        return sortedFocusSets.length >= 3 ? sortedFocusSets.slice(0,3) : sortedFocusSets;
     }
 
     calculateFocusSet(error) {
@@ -121,16 +126,10 @@ module.exports = class Markov {
 
 
     calculateError(userMatrix, expectedMatrix) {
-        // let a = math.multiply(userMatrix, 100);
-        // let b = math.multiply(expectedMatrix, 100);
         let a = userMatrix;
         let b = expectedMatrix;
         let sub = math.subtract(b, a);
-        // let divided = math.dotDivide(sub, a);
         let divided = this.divide(sub._data, b._data);
-        // console.log(divided)
-        // console.log(divided);
-        // let multiplied = math.dotMultiply(divided, 100);
         return divided;
     }
 
@@ -139,13 +138,6 @@ module.exports = class Markov {
         for (let i in a) {
             let tmp = []
             for (let x in a[i]) {
-                if (a[i][x] !== 0) {
-                    console.log("divide")
-                    console.log("parent "+  this.states[i] + " child " + this.states[x]);
-                    console.log(a[i][x])
-                    console.log(a[i][x] / b[i][x])
-                    console.log(b[i][x])
-                }
                 if (b[i][x] === 0) {
                     tmp.push(0);
                     continue;
