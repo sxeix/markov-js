@@ -14,17 +14,17 @@ module.exports = class Markov {
     init() {
         for (const state of this.states) {
             this.model[state] = {}
-            this.model[state]["totalCount"] = 0
+            this.model[state]["tc"] = 0
             this.expectedModel[state] = {}
-            this.expectedModel[state]["totalCount"] = 0
+            this.expectedModel[state]["tc"] = 0
             for (const innerState of this.states) {
                 this.model[state][innerState] = {
-                    count: 0,
-                    probability: 0.0
+                    c: 0, // count
+                    p: 0.0 // probability
                 };
                 this.expectedModel[state][innerState] = {
-                    count: 0,
-                    probability: 0.0
+                    c: 0, // count
+                    p: 0.0 // probability
                 };
             }
         }
@@ -52,32 +52,32 @@ module.exports = class Markov {
     }
 
     updateNode(parent, child) {
-        this.model[parent].totalCount = this.model[parent].totalCount + 1;
-        this.model[parent][child].count = this.model[parent][child].count + 1;
+        this.model[parent].tc = this.model[parent].tc + 1; // totalCount
+        this.model[parent][child].c = this.model[parent][child].c + 1;
     }
 
     updateExpectedNode(parent, child) {
-        this.expectedModel[parent].totalCount = this.expectedModel[parent].totalCount + 1;
-        this.expectedModel[parent][child].count = this.expectedModel[parent][child].count + 1;
+        this.expectedModel[parent].tc = this.expectedModel[parent].tc + 1; // totalCount
+        this.expectedModel[parent][child].c = this.expectedModel[parent][child].c + 1;
     }
 
     refreshProbabilities() {
         for (const state of this.states) {
-            let charTotal = this.model[state].totalCount;
+            let charTotal = this.model[state].tc;
             for (const childState of this.states) {
-                let childCharTotal = this.model[state][childState].count
+                let childCharTotal = this.model[state][childState].c
                 if (childCharTotal !== 0) {
-                    this.model[state][childState].probability = childCharTotal / charTotal;
+                    this.model[state][childState].p = childCharTotal / charTotal;
                 }
             }
         }
 
         for (const state of this.states) {
-            let expectedCharTotal = this.expectedModel[state].totalCount;
+            let expectedCharTotal = this.expectedModel[state].tc;
             for (const childState of this.states) {
-                let expectedChildCharTotal = this.expectedModel[state][childState].count
+                let expectedChildCharTotal = this.expectedModel[state][childState].c
                 if (expectedChildCharTotal !== 0) {
-                    this.expectedModel[state][childState].probability = expectedChildCharTotal / expectedCharTotal;
+                    this.expectedModel[state][childState].p = expectedChildCharTotal / expectedCharTotal;
                 }
             }
         }
@@ -89,7 +89,7 @@ module.exports = class Markov {
         let error = this.calculateError(userMatrix, expectedMatrix);
         let focusSets =  this.calculateFocusSet(error);
         let sortedFocusSets = focusSets.sort((a, b) => {
-            return (a.error < b.error) ? 1 : (a.error > b.error) ? -1 : 0;
+            return (a.e < b.e) ? 1 : (a.e > b.e) ? -1 : 0;
         });
         return sortedFocusSets.length >= 3 ? sortedFocusSets.slice(0,3) : sortedFocusSets;
     }
@@ -99,11 +99,11 @@ module.exports = class Markov {
         let foundErrors = [];
         for (let parentChar = 0; parentChar < 26; parentChar++) {
             for (let childChar = 0; childChar < 26; childChar++) {
-                if (this.expectedModel[this.states[parentChar]][this.states[childChar]].count > 0) { // TODO: set this to 5
+                if (this.expectedModel[this.states[parentChar]][this.states[childChar]].c > 0) { // TODO: set this to 5
                     foundErrors.push({
-                        parentChar: this.states[parentChar],
-                        childChar: this.states[childChar],
-                        error: errorList[parentChar][childChar]
+                        pc: this.states[parentChar],
+                        cc: this.states[childChar],
+                        e: errorList[parentChar][childChar]
                     })
                 }
             }
@@ -117,7 +117,7 @@ module.exports = class Markov {
             let transitionLine = [];
             let firstChar = model[state];
             for (const childState of this.states) {
-                transitionLine.push(firstChar[childState].probability);
+                transitionLine.push(firstChar[childState].p);
             }
             transitions.push(transitionLine);
         }
