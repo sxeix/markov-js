@@ -153,8 +153,18 @@ module.exports = class Markov {
         // TODO: make this work properly
         return wordset.split(" ");
     }
-    
-    displayModel() {
-        console.log(this.model);
+
+    getUserModel() {
+        return this.model;
+    }
+
+    getExpectedModel() {
+        return this.expectedModel;
+    }
+
+    loadModels(user, expected) {
+        this.model = user;
+        this.expectedModel = expected;
+        this.init();
     }
  }
